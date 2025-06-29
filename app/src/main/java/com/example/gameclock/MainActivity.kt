@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.chessclock.ui.theme.ChessClockTheme
+import com.example.gameclock.ui.theme.ChessClockTheme
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ChessClockTheme {
-                GameClockScreen()
+                ChessClockScreen()
             }
         }
     }
@@ -164,6 +164,6 @@ fun formatTime(timeMs: Long): String {
 @Composable
 fun GameClockPreview() {
     ChessClockTheme {
-        GameClockScreen()
+        ChessClockScreen()
     }
 }
