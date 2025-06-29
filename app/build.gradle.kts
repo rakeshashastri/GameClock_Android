@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.example.chessclock"
+    namespace = "com.example.gameclock"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.chessclock"
-        minSdk = 30
+        applicationId = "com.example.gameclock"
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

@@ -1,4 +1,4 @@
-package com.example.chessclock
+package com.example.gameclock
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ChessClockTheme {
-                ChessClockScreen()
+                GameClockScreen()
             }
         }
     }
@@ -162,8 +162,8 @@ fun formatTime(timeMs: Long): String {
 
 @Preview(showBackground = true)
 @Composable
-fun ChessClockPreview() {
+fun GameClockPreview() {
     ChessClockTheme {
-        ChessClockScreen()
+        GameClockScreen()
     }
 }

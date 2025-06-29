@@ -1,4 +1,4 @@
-package com.example.chessclock.ui.theme
+package com.example.gameclock.ui.theme
 
 import android.app.Activity
 import android.os.Build

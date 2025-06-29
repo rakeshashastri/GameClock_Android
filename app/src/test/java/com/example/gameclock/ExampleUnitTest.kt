@@ -1,4 +1,4 @@
-package com.example.chessclock
+package com.example.gameclock
 
 import org.junit.Test
 
