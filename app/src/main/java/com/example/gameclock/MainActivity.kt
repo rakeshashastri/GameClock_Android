@@ -150,7 +150,7 @@ fun ChessClockScreen(onNavigateToSettings: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(50.dp)
         ) {
             if (!isRunning) {
-                IconButton(onClick = onNavigateToSettings) {
+                FloatingActionButton(onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Settings"
@@ -168,7 +168,7 @@ fun ChessClockScreen(onNavigateToSettings: () -> Unit) {
             }
 
             if (!isRunning) {
-                IconButton(onClick = { /* TODO: Change timer settings */ }) {
+                FloatingActionButton(onClick = { /* TODO: Change timer settings */ }) {
                     Icon(
                         imageVector = Icons.Filled.Schedule,
                         contentDescription = "Change Timer"
