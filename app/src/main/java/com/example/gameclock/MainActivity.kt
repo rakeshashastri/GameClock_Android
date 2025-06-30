@@ -9,31 +9,54 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.gameclock.ui.SettingsScreen
+import com.example.gameclock.ui.ThemeViewModel
 import com.example.gameclock.ui.theme.ChessClockTheme
+import com.example.gameclock.ui.theme.Theme
 import kotlinx.coroutines.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ChessClockTheme {
-                ChessClockScreen()
+            val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModelFactory(LocalContext.current))
+            val theme by themeViewModel.theme.collectAsState()
+
+            ChessClockTheme(theme = theme) {
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "clock") {
+                    composable("clock") { ChessClockScreen(onNavigateToSettings = { navController.navigate("settings") }) }
+                    composable("settings") {
+                        SettingsScreen(
+                            selectedTheme = theme,
+                            onThemeChange = { themeViewModel.setTheme(it) },
+                            onDone = { navController.popBackStack() }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun ChessClockScreen() {
+fun ChessClockScreen(onNavigateToSettings: () -> Unit) {
     var player1TimeMs by remember { mutableStateOf(600_000L) }
     var player2TimeMs by remember { mutableStateOf(600_000L) }
     var isPlayer1sTurn by remember { mutableStateOf(true) }
@@ -68,6 +91,8 @@ fun ChessClockScreen() {
         lastUpdateTime = 0L
     }
 
+    val colorScheme = MaterialTheme.colorScheme
+
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
@@ -86,7 +111,9 @@ fun ChessClockScreen() {
                         } else if (isRunning && !isPlayer1sTurn) {
                             isPlayer1sTurn = true
                         }
-                    }
+                    },
+                    backgroundColor = colorScheme.secondary,
+                    textColor = colorScheme.onSecondary
                 )
             }
 
@@ -106,23 +133,48 @@ fun ChessClockScreen() {
                         } else if (isRunning && isPlayer1sTurn) {
                             isPlayer1sTurn = false
                         }
-                    }
+                    },
+                    backgroundColor = colorScheme.primary,
+                    textColor = colorScheme.onPrimary
                 )
             }
         }
 
         val fabOffsetY = (maxHeight * player2Weight / (player1Weight + player2Weight)) - 28.dp
 
-        FloatingActionButton(
-            onClick = { isRunning = !isRunning },
+        Row(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = fabOffsetY)
+                .offset(y = fabOffsetY),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(50.dp)
         ) {
-            Icon(
-                imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                contentDescription = if (isRunning) "Pause" else "Start",
-            )
+            if (!isRunning) {
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings"
+                    )
+                }
+            }
+
+            FloatingActionButton(
+                onClick = { isRunning = !isRunning }
+            ) {
+                Icon(
+                    imageVector = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    contentDescription = if (isRunning) "Pause" else "Start",
+                )
+            }
+
+            if (!isRunning) {
+                IconButton(onClick = { /* TODO: Change timer settings */ }) {
+                    Icon(
+                        imageVector = Icons.Filled.Schedule,
+                        contentDescription = "Change Timer"
+                    )
+                }
+            }
         }
     }
 }
@@ -132,11 +184,10 @@ fun PlayerTimer(
     timeMs: Long,
     isActive: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    backgroundColor: Color,
+    textColor: Color
 ) {
-    val backgroundColor = if (isActive) Color(0xFF006400) else MaterialTheme.colorScheme.surface
-    val textColor = if (isActive) Color.White else MaterialTheme.colorScheme.onSurface
-
     Surface(
         modifier = modifier,
         color = backgroundColor,
@@ -164,6 +215,6 @@ fun formatTime(timeMs: Long): String {
 @Composable
 fun GameClockPreview() {
     ChessClockTheme {
-        ChessClockScreen()
+        ChessClockScreen(onNavigateToSettings = {})
     }
 }

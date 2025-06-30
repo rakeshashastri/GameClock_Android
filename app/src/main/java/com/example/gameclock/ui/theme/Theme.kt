@@ -11,43 +11,45 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+enum class Theme {
+    CLASSIC,
+    MODERN,
+    MINIMALIST
+}
+
+private val ClassicColorScheme = lightColorScheme(
+    primary = ClassicDarkSlateGrey,
+    secondary = ClassicLightGrey,
+    onPrimary = ClassicTextOnDark,
+    onSecondary = ClassicTextOnLight,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+private val ModernColorScheme = lightColorScheme(
+    primary = ModernDeepTeal,
+    secondary = ModernWarmSand,
+    onPrimary = ModernText,
+    onSecondary = ModernText,
+)
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val MinimalistColorScheme = lightColorScheme(
+    primary = MinimalistMidnightBlue,
+    secondary = MinimalistSilver,
+    onPrimary = MinimalistTextOnDark,
+    onSecondary = MinimalistTextOnLight,
 )
 
 @Composable
 fun ChessClockTheme(
+    theme: Theme = Theme.CLASSIC,
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val colorScheme = when (theme) {
+        Theme.CLASSIC -> ClassicColorScheme
+        Theme.MODERN -> ModernColorScheme
+        Theme.MINIMALIST -> MinimalistColorScheme
     }
 
     MaterialTheme(
