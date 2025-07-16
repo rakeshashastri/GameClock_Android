@@ -116,6 +116,7 @@ fun GameScreen(
                     activePlayer = gameUiState.activePlayer,
                     isActive = gameUiState.activePlayer == Player.PLAYER_TWO,
                     isPaused = gameUiState.gameState == GameState.PAUSED,
+                    winner = gameUiState.winner,
                     theme = currentTheme,
                     onPlayerTap = { onPlayerTap(Player.PLAYER_TWO) },
                     modifier = Modifier
@@ -131,6 +132,7 @@ fun GameScreen(
                     activePlayer = gameUiState.activePlayer,
                     isActive = gameUiState.activePlayer == Player.PLAYER_ONE,
                     isPaused = gameUiState.gameState == GameState.PAUSED,
+                    winner = gameUiState.winner,
                     theme = currentTheme,
                     onPlayerTap = { onPlayerTap(Player.PLAYER_ONE) },
                     modifier = Modifier
@@ -151,16 +153,7 @@ fun GameScreen(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // Winner Display Overlay (Requirement 1.4, 5.4, 8.4)
-            gameUiState.winner?.let { winner ->
-                if (gameUiState.gameState == GameState.GAME_OVER) {
-                    WinnerDisplayOverlay(
-                        winner = winner,
-                        theme = currentTheme,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            }
+
         }
         
         // Time Control Bottom Sheet (Requirement 2.1: Connect TimeControlBottomSheet to game screen)

@@ -66,6 +66,7 @@ fun PlayerTimerArea(
     activePlayer: Player?,
     isActive: Boolean,
     isPaused: Boolean,
+    winner: Player?,
     theme: AppTheme,
     onPlayerTap: () -> Unit,
     modifier: Modifier = Modifier
@@ -120,13 +121,22 @@ fun PlayerTimerArea(
         )
     }
     
-    // Get player color from theme
-    val backgroundColor = Color(
-        when (player) {
-            Player.PLAYER_ONE -> theme.player1Color
-            Player.PLAYER_TWO -> theme.player2Color
+    // Get player color from theme, or red if this player lost
+    val backgroundColor = when {
+        gameState == GameState.GAME_OVER && winner != null && winner != player -> {
+            // Show red for the losing player
+            Color(0xFFD32F2F) // Material Red 700
         }
-    )
+        else -> {
+            // Use theme color for normal states
+            Color(
+                when (player) {
+                    Player.PLAYER_ONE -> theme.player1Color
+                    Player.PLAYER_TWO -> theme.player2Color
+                }
+            )
+        }
+    }
     
     // Calculate text color for contrast
     val textColor = if (isLightColor(backgroundColor)) {
@@ -138,9 +148,6 @@ fun PlayerTimerArea(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = tween(durationMillis = 300)
-            )
             .scale(scale * clickScale.value)
             .background(backgroundColor)
             .alpha(alpha)
