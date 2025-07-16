@@ -30,8 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.example.gameclock.models.GameState
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * ControlButtonsOverlay composable that displays floating action buttons for game controls
@@ -58,11 +61,11 @@ fun ControlButtonsOverlay(
     Box(
         modifier = modifier.fillMaxSize()
     ) {
-        // Position buttons at the border between the two play areas
+        // Position buttons at the exact border between the two play areas
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = borderPosition),
+                .padding(top = borderPosition - 36.dp), // Offset by half the largest button height (72dp / 2)
             contentAlignment = Alignment.TopCenter
         ) {
             when (gameState) {
@@ -113,7 +116,7 @@ private fun StoppedStateButtons(
     onTimeControlClick: () -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(50.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Settings button
@@ -217,7 +220,7 @@ private fun PausedStateButtons(
     onSettingsClick: () -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(50.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Reset button (Requirement 8.1)
@@ -292,7 +295,7 @@ private fun GameOverStateButtons(
     onSettingsClick: () -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(50.dp)
     ) {
         // Reset button
         AnimatedVisibility(
