@@ -30,11 +30,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.example.gameclock.models.GameState
 import kotlin.math.max
 import kotlin.math.min
+
+/**
+ * High-contrast color scheme for floating action buttons that provides excellent visibility
+ * against various background colors. Uses dark charcoal background with white icons
+ * for optimal contrast and accessibility.
+ */
+private val ButtonBackgroundColor = Color(0xFF2D3748) // Dark charcoal/slate
+private val ButtonIconColor = Color.White
 
 /**
  * ControlButtonsOverlay composable that displays floating action buttons for game controls
@@ -130,11 +139,13 @@ private fun StoppedStateButtons(
                 modifier = Modifier
                     .size(56.dp) // Standard FAB size (Requirement 7.4)
                     .semantics { contentDescription = "Open settings" },
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -150,12 +161,14 @@ private fun StoppedStateButtons(
                 modifier = Modifier
                     .size(72.dp) // Large primary button
                     .semantics { contentDescription = "Start game" },
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(36.dp),
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -171,11 +184,13 @@ private fun StoppedStateButtons(
                 modifier = Modifier
                     .size(56.dp) // Standard FAB size (Requirement 7.4)
                     .semantics { contentDescription = "Select time control" },
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.Timer,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -199,12 +214,14 @@ private fun RunningStateButtons(
             modifier = Modifier
                 .size(64.dp) // Medium size for pause button
                 .semantics { contentDescription = "Pause game" },
-            containerColor = MaterialTheme.colorScheme.tertiary
+            containerColor = ButtonBackgroundColor,
+            contentColor = ButtonIconColor
         ) {
             Icon(
                 imageVector = Icons.Default.Pause,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
+                tint = ButtonIconColor
             )
         }
     }
@@ -234,11 +251,13 @@ private fun PausedStateButtons(
                 modifier = Modifier
                     .size(56.dp) // Standard FAB size (Requirement 7.4)
                     .semantics { contentDescription = "Reset game" },
-                containerColor = MaterialTheme.colorScheme.error
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -254,12 +273,14 @@ private fun PausedStateButtons(
                 modifier = Modifier
                     .size(72.dp) // Large primary button
                     .semantics { contentDescription = "Resume game" },
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
                     contentDescription = null,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(36.dp),
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -275,11 +296,13 @@ private fun PausedStateButtons(
                 modifier = Modifier
                     .size(56.dp) // Standard FAB size (Requirement 7.4)
                     .semantics { contentDescription = "Open settings" },
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -308,12 +331,14 @@ private fun GameOverStateButtons(
                 modifier = Modifier
                     .size(64.dp) // Medium size for reset button
                     .semantics { contentDescription = "Reset game" },
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
                     contentDescription = null,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp),
+                    tint = ButtonIconColor
                 )
             }
         }
@@ -329,11 +354,13 @@ private fun GameOverStateButtons(
                 modifier = Modifier
                     .size(56.dp) // Standard FAB size (Requirement 7.4)
                     .semantics { contentDescription = "Open settings" },
-                containerColor = MaterialTheme.colorScheme.secondary
+                containerColor = ButtonBackgroundColor,
+                contentColor = ButtonIconColor
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = ButtonIconColor
                 )
             }
         }
