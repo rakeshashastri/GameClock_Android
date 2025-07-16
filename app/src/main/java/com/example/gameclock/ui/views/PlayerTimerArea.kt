@@ -145,7 +145,11 @@ fun PlayerTimerArea(
             .background(backgroundColor)
             .alpha(alpha)
             .clickable(
-                enabled = gameState in listOf(GameState.RUNNING, GameState.PAUSED)
+                enabled = when (gameState) {
+                    GameState.RUNNING -> isActive // Only active player's area is clickable when running
+                    GameState.PAUSED -> true // Both areas clickable when paused (for resuming)
+                    else -> false // No areas clickable when stopped or game over
+                }
             ) {
                 // Provide haptic feedback (Requirement 7.2)
                 performHapticFeedback(context)
