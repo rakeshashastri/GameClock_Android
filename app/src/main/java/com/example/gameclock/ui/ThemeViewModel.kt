@@ -1,40 +1,48 @@
+
 package com.example.gameclock.ui
 
-import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gameclock.ui.theme.Theme
-import kotlinx.coroutines.flow.SharingStarted
+import com.example.gameclock.models.AppTheme
+import com.example.gameclock.repositories.PreferencesRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+class ThemeViewModel(
+    private val preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
-class ThemeViewModel(private val context: Context) : ViewModel() {
+    private val _currentTheme = MutableStateFlow(AppTheme.DEFAULT)
+    val currentTheme: StateFlow<AppTheme> = _currentTheme.asStateFlow()
 
-    private val themeKey = stringPreferencesKey("theme")
+    val availableThemes: List<AppTheme> = AppTheme.ALL_THEMES
 
-    val theme: StateFlow<Theme> = context.dataStore.data
-        .map { preferences ->
-            Theme.valueOf(preferences[themeKey] ?: Theme.CLASSIC.name)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = Theme.CLASSIC
-        )
+    init {
+        loadCurrentTheme()
+    }
 
-    fun setTheme(theme: Theme) {
+    fun selectTheme(theme: AppTheme) {
         viewModelScope.launch {
-            context.dataStore.edit {
-                it[themeKey] = theme.name
+            try {
+                preferencesRepository.saveTheme(theme)
+                _currentTheme.value = theme
+            } catch (e: Exception) {
+                // Handle error - could emit error state or log
+                // For now, keep current theme unchanged
+            }
+        }
+    }
+
+    private fun loadCurrentTheme() {
+        viewModelScope.launch {
+            try {
+                val savedTheme = preferencesRepository.getSelectedTheme()
+                _currentTheme.value = savedTheme
+            } catch (e: Exception) {
+                // Handle error - fallback to default theme
+                _currentTheme.value = AppTheme.DEFAULT
             }
         }
     }
