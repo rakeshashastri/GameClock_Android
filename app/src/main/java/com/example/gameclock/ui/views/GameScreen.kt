@@ -216,8 +216,8 @@ private fun calculatePlayerHeights(
     val availableHeight = screenHeight
     
     return when {
-        // When game is running and there's an active player, expand their area
-        gameUiState.gameState == GameState.RUNNING && gameUiState.activePlayer != null -> {
+        // When game is running or paused and there's an active player, maintain the expanded area
+        (gameUiState.gameState == GameState.RUNNING || gameUiState.gameState == GameState.PAUSED) && gameUiState.activePlayer != null -> {
             val activeHeight = availableHeight * 0.7f
             val inactiveHeight = availableHeight * 0.3f
             
@@ -228,7 +228,7 @@ private fun calculatePlayerHeights(
             }
         }
         
-        // Equal heights for all other states (stopped, paused, game over)
+        // Equal heights for stopped and game over states
         else -> {
             val equalHeight = availableHeight / 2
             Pair(equalHeight, equalHeight)
