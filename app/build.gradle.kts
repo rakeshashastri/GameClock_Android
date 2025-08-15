@@ -23,6 +23,16 @@ android {
         }
     }
 
+    // Add signing configurations (you'll need to create a keystore first)
+    signingConfigs {
+        create("release") {
+            storeFile = file("gameclock-release-key.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD") as String?
+            keyAlias = "gameclock"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD") as String?
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -31,19 +41,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Optional: Add signing config here once you create your keystore
             // signingConfig = signingConfigs.getByName("release")
-        }
-    }
-    
-    // Add signing configurations (you'll need to create a keystore first)
-    signingConfigs {
-        create("release") {
-            // You'll fill these in after creating your keystore
-            // storeFile = file("path/to/your/keystore.jks")
-            // storePassword = "your_store_password"
-            // keyAlias = "your_key_alias"
-            // keyPassword = "your_key_password"
         }
     }
     compileOptions {
