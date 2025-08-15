@@ -51,7 +51,12 @@ class MainActivity : ComponentActivity() {
                             else -> { /* No action for stopped/game over states */ }
                         }
                     },
-                    onPlayClick = { gameViewModel.startGame() },
+                    onPlayClick = { 
+                        when {
+                            gameUiState.canStartGame() -> gameViewModel.startGame()
+                            gameUiState.canResumeGame() -> gameViewModel.resumeGame()
+                        }
+                    },
                     onPauseClick = { gameViewModel.pauseGame() },
                     onResetClick = { gameViewModel.resetGame() },
                     onTimeControlSelected = { timeControl ->
