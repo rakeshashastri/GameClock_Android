@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.example.gameclock.models.AppTheme
 import com.example.gameclock.models.GameState
 import com.example.gameclock.models.Player
+import com.example.gameclock.ui.theme.LocalGameColors
 
 /**
  * PlayerTimerArea composable that displays a player's timer with visual state changes
@@ -67,12 +68,13 @@ fun PlayerTimerArea(
     isActive: Boolean,
     isPaused: Boolean,
     winner: Player?,
-    theme: AppTheme,
+    theme: AppTheme, // Keep for backward compatibility, but use LocalGameColors internally
     onPlayerTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
+    val gameColors = LocalGameColors.current
     
     // Calculate responsive font size based on screen width (Requirement 7.5)
     val screenWidth = configuration.screenWidthDp
@@ -128,21 +130,26 @@ fun PlayerTimerArea(
             Color(0xFFD32F2F) // Material Red 700
         }
         else -> {
-            // Use theme color for normal states
-            Color(
-                when (player) {
-                    Player.PLAYER_ONE -> theme.player1Color
-                    Player.PLAYER_TWO -> theme.player2Color
-                }
-            )
+            // Use theme color for normal states from LocalGameColors
+            when (player) {
+                Player.PLAYER_ONE -> gameColors.player1Color
+                Player.PLAYER_TWO -> gameColors.player2Color
+            }
         }
     }
     
-    // Calculate text color for contrast
-    val textColor = if (isLightColor(backgroundColor)) {
-        Color.Black
-    } else {
-        Color.White
+    // Use pre-calculated text color for contrast from LocalGameColors
+    val textColor = when {
+        gameState == GameState.GAME_OVER && winner != null && winner != player -> {
+            // Use white text on red background for losing player
+            Color.White
+        }
+        else -> {
+            when (player) {
+                Player.PLAYER_ONE -> gameColors.onPlayer1Color
+                Player.PLAYER_TWO -> gameColors.onPlayer2Color
+            }
+        }
     }
     
     Box(

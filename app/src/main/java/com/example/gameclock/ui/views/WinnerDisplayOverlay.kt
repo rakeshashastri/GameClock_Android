@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gameclock.models.AppTheme
 import com.example.gameclock.models.Player
+import com.example.gameclock.ui.theme.LocalGameColors
 import kotlinx.coroutines.delay
 
 /**
@@ -43,9 +44,10 @@ import kotlinx.coroutines.delay
 @Composable
 fun WinnerDisplayOverlay(
     winner: Player,
-    theme: AppTheme,
+    theme: AppTheme, // Keep for backward compatibility, but use LocalGameColors internally
     modifier: Modifier = Modifier
 ) {
+    val gameColors = LocalGameColors.current
     var isVisible by remember { mutableStateOf(false) }
     
     // Animate in the winner display
@@ -77,12 +79,10 @@ fun WinnerDisplayOverlay(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
                     .background(
-                        Color(
-                            when (winner) {
-                                Player.PLAYER_ONE -> theme.player1Color
-                                Player.PLAYER_TWO -> theme.player2Color
-                            }
-                        )
+                        when (winner) {
+                            Player.PLAYER_ONE -> gameColors.player1Color
+                            Player.PLAYER_TWO -> gameColors.player2Color
+                        }
                     )
                     .padding(32.dp),
                 contentAlignment = Alignment.Center
@@ -95,14 +95,10 @@ fun WinnerDisplayOverlay(
                         text = "WINNER",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
-                        color = getContrastColor(
-                            Color(
-                                when (winner) {
-                                    Player.PLAYER_ONE -> theme.player1Color
-                                    Player.PLAYER_TWO -> theme.player2Color
-                                }
-                            )
-                        ),
+                        color = when (winner) {
+                            Player.PLAYER_ONE -> gameColors.onPlayer1Color
+                            Player.PLAYER_TWO -> gameColors.onPlayer2Color
+                        },
                         textAlign = TextAlign.Center
                     )
                     
@@ -116,14 +112,10 @@ fun WinnerDisplayOverlay(
                         },
                         fontSize = 48.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = getContrastColor(
-                            Color(
-                                when (winner) {
-                                    Player.PLAYER_ONE -> theme.player1Color
-                                    Player.PLAYER_TWO -> theme.player2Color
-                                }
-                            )
-                        ),
+                        color = when (winner) {
+                            Player.PLAYER_ONE -> gameColors.onPlayer1Color
+                            Player.PLAYER_TWO -> gameColors.onPlayer2Color
+                        },
                         textAlign = TextAlign.Center
                     )
                     
@@ -134,14 +126,10 @@ fun WinnerDisplayOverlay(
                         text = "Tap Reset to play again",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium,
-                        color = getContrastColor(
-                            Color(
-                                when (winner) {
-                                    Player.PLAYER_ONE -> theme.player1Color
-                                    Player.PLAYER_TWO -> theme.player2Color
-                                }
-                            )
-                        ).copy(alpha = 0.8f),
+                        color = when (winner) {
+                            Player.PLAYER_ONE -> gameColors.onPlayer1Color.copy(alpha = 0.8f)
+                            Player.PLAYER_TWO -> gameColors.onPlayer2Color.copy(alpha = 0.8f)
+                        },
                         textAlign = TextAlign.Center
                     )
                 }

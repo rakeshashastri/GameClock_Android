@@ -24,13 +24,17 @@ class ThemeViewModel(
     }
 
     fun selectTheme(theme: AppTheme) {
+        // Update UI state immediately for instant visual feedback
+        _currentTheme.value = theme
+        
+        // Save to preferences asynchronously
         viewModelScope.launch {
             try {
                 preferencesRepository.saveTheme(theme)
-                _currentTheme.value = theme
             } catch (e: Exception) {
                 // Handle error - could emit error state or log
-                // For now, keep current theme unchanged
+                // If save fails, we could revert the theme, but for now keep the change
+                android.util.Log.w("ThemeViewModel", "Failed to save theme preference", e)
             }
         }
     }

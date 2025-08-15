@@ -10,14 +10,14 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import com.example.gameclock.models.AppTheme
 
 // Custom composition local for game-specific colors
-val LocalGameColors = staticCompositionLocalOf { GameColors() }
+val LocalGameColors = compositionLocalOf { GameColors() }
 
 data class GameColors(
     val player1Color: Color = Color(0xFF1A1A1A),
