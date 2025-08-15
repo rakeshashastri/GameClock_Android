@@ -48,7 +48,15 @@ class MainActivity : ComponentActivity() {
                         when (gameUiState.gameState) {
                             GameState.RUNNING -> gameViewModel.switchPlayer()
                             GameState.PAUSED -> gameViewModel.resumeGame()
-                            else -> { /* No action for stopped/game over states */ }
+                            GameState.STOPPED -> {
+                                // When game hasn't started, tapping any timer starts the OTHER player's timer
+                                val startingPlayer = when (player) {
+                                    com.example.gameclock.models.Player.PLAYER_ONE -> com.example.gameclock.models.Player.PLAYER_TWO
+                                    com.example.gameclock.models.Player.PLAYER_TWO -> com.example.gameclock.models.Player.PLAYER_ONE
+                                }
+                                gameViewModel.startGameWithPlayer(startingPlayer)
+                            }
+                            else -> { /* No action for game over state */ }
                         }
                     },
                     onPlayClick = { 

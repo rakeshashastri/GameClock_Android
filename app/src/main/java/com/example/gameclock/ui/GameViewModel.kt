@@ -106,6 +106,23 @@ class GameViewModel(
         startTimer()
     }
 
+    fun startGameWithPlayer(startingPlayer: Player) {
+        val currentState = _uiState.value
+        if (!currentState.canStartGame()) return
+
+        // Initialize timer tracking variables
+        gameStartTime = System.currentTimeMillis()
+        initialPlayer1Time = currentState.player1Time
+        initialPlayer2Time = currentState.player2Time
+
+        _uiState.value = currentState.copy(
+            gameState = GameState.RUNNING,
+            activePlayer = startingPlayer
+        )
+        
+        startTimer()
+    }
+
     fun pauseGame() {
         val currentState = _uiState.value
         if (!currentState.canPauseGame()) return
