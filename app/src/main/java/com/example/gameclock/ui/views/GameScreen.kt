@@ -3,6 +3,7 @@ package com.example.gameclock.ui.views
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -60,34 +61,12 @@ fun GameScreen(
     onThemeSelected: (AppTheme) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-    
     // Modal state management (Requirement 10.4: Proper modal presentation patterns)
     var showTimeControlBottomSheet by remember { mutableStateOf(false) }
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showCustomTimeControlDialog by remember { mutableStateOf(false) }
     
     val timeControlSheetState = rememberModalBottomSheetState()
-    
-    // Calculate heights based on active player state (Requirement 5.2)
-    val (player1Height, player2Height) = calculatePlayerHeights(
-        gameUiState = gameUiState,
-        screenHeight = screenHeight
-    )
-    
-    // Animate height transitions for smooth area changes
-    val animatedPlayer1Height by animateDpAsState(
-        targetValue = player1Height,
-        animationSpec = tween(durationMillis = 300),
-        label = "player1Height"
-    )
-    
-    val animatedPlayer2Height by animateDpAsState(
-        targetValue = player2Height,
-        animationSpec = tween(durationMillis = 300),
-        label = "player2Height"
-    )
     
     Surface(
         modifier = modifier
@@ -104,7 +83,29 @@ fun GameScreen(
             },
         color = MaterialTheme.colorScheme.background
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            // Use the actual available height from BoxWithConstraints
+            val actualScreenHeight = maxHeight
+            
+            // Calculate heights based on active player state (Requirement 5.2)
+            val (player1Height, player2Height) = calculatePlayerHeights(
+                gameUiState = gameUiState,
+                screenHeight = actualScreenHeight
+            )
+            
+            // Animate height transitions for smooth area changes
+            val animatedPlayer1Height by animateDpAsState(
+                targetValue = player1Height,
+                animationSpec = tween(durationMillis = 300),
+                label = "player1Height"
+            )
+            
+            val animatedPlayer2Height by animateDpAsState(
+                targetValue = player2Height,
+                animationSpec = tween(durationMillis = 300),
+                label = "player2Height"
+            )
+            
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -152,8 +153,6 @@ fun GameScreen(
                 borderPosition = animatedPlayer2Height, // Position at the animated border between areas
                 modifier = Modifier.fillMaxSize()
             )
-            
-
         }
         
         // Time Control Bottom Sheet (Requirement 2.1: Connect TimeControlBottomSheet to game screen)
