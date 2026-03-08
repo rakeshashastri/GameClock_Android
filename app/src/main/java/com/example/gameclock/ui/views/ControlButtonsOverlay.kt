@@ -232,28 +232,28 @@ private fun PausedStateButtons(
         horizontalArrangement = Arrangement.spacedBy(50.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Reset button (Requirement 8.1)
+        // Settings button (kept on left for consistency with stopped state)
         AnimatedVisibility(
             visible = true,
             enter = scaleIn(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
             exit = scaleOut(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
         ) {
             FloatingActionButton(
-                onClick = onResetClick,
+                onClick = onSettingsClick,
                 modifier = Modifier
-                    .size(56.dp) // Standard FAB size (Requirement 7.4)
-                    .semantics { contentDescription = "Reset game" },
+                    .size(56.dp)
+                    .semantics { contentDescription = "Open settings" },
                 containerColor = ButtonBackgroundColor,
                 contentColor = ButtonIconColor
             ) {
                 Icon(
-                    imageVector = Icons.Default.Refresh,
+                    imageVector = Icons.Default.Settings,
                     contentDescription = null,
                     tint = ButtonIconColor
                 )
             }
         }
-        
+
         // Resume button
         AnimatedVisibility(
             visible = true,
@@ -263,7 +263,7 @@ private fun PausedStateButtons(
             FloatingActionButton(
                 onClick = onPlayClick,
                 modifier = Modifier
-                    .size(72.dp) // Large primary button
+                    .size(72.dp)
                     .semantics { contentDescription = "Resume game" },
                 containerColor = ButtonBackgroundColor,
                 contentColor = ButtonIconColor
@@ -276,23 +276,23 @@ private fun PausedStateButtons(
                 )
             }
         }
-        
-        // Settings button
+
+        // Reset button (kept on right for consistency with time control position)
         AnimatedVisibility(
             visible = true,
             enter = scaleIn(animationSpec = tween(300, delayMillis = 200)) + fadeIn(animationSpec = tween(300, delayMillis = 200)),
             exit = scaleOut(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
         ) {
             FloatingActionButton(
-                onClick = onSettingsClick,
+                onClick = onResetClick,
                 modifier = Modifier
-                    .size(56.dp) // Standard FAB size (Requirement 7.4)
-                    .semantics { contentDescription = "Open settings" },
+                    .size(56.dp)
+                    .semantics { contentDescription = "Reset game" },
                 containerColor = ButtonBackgroundColor,
                 contentColor = ButtonIconColor
             ) {
                 Icon(
-                    imageVector = Icons.Default.Settings,
+                    imageVector = Icons.Default.Refresh,
                     contentDescription = null,
                     tint = ButtonIconColor
                 )
