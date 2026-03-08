@@ -51,7 +51,6 @@ class GameViewModel(
     val activePlayer: StateFlow<Player?> = _activePlayer.asStateFlow()
 
     companion object {
-        private const val LOW_TIME_THRESHOLD_MS = 30_000L
         private const val SHOW_DECIMALS_THRESHOLD_MS = 20_000L
     }
 
@@ -83,6 +82,8 @@ class GameViewModel(
             val lastUsedTimeControl = preferencesRepository.getLastUsedTimeControl()
                 ?: TimeControl.BLITZ_PRESETS[2]
             val lowTimeEnabled = preferencesRepository.getLowTimeWarningEnabled()
+            val lowTimeThreshold = preferencesRepository.getLowTimeThreshold()
+            val tapSoundEnabled = preferencesRepository.getTapSoundEnabled()
 
             _uiState.value = _uiState.value.copy(
                 recentTimeControls = recentTimeControls,
@@ -91,7 +92,9 @@ class GameViewModel(
                 player2TimeControl = lastUsedTimeControl,
                 player1TimeMs = lastUsedTimeControl.totalTimeSeconds * 1000L,
                 player2TimeMs = lastUsedTimeControl.totalTimeSeconds * 1000L,
-                lowTimeWarningEnabled = lowTimeEnabled
+                lowTimeWarningEnabled = lowTimeEnabled,
+                lowTimeThresholdMs = lowTimeThreshold,
+                tapSoundEnabled = tapSoundEnabled
             )
         } catch (e: Exception) {
             android.util.Log.w("GameViewModel", "Failed to load initial data", e)
@@ -306,13 +309,14 @@ class GameViewModel(
         val newTimeMs = maxOf(0L, currentTimeMs - remainingElapsed)
 
         // Update low time flags
+        val threshold = _uiState.value.lowTimeThresholdMs
         val isLowTime1 = when (activePlayer) {
-            Player.PLAYER_ONE -> newTimeMs in 1..LOW_TIME_THRESHOLD_MS
-            Player.PLAYER_TWO -> _uiState.value.player1TimeMs in 1..LOW_TIME_THRESHOLD_MS
+            Player.PLAYER_ONE -> newTimeMs in 1..threshold
+            Player.PLAYER_TWO -> _uiState.value.player1TimeMs in 1..threshold
         }
         val isLowTime2 = when (activePlayer) {
-            Player.PLAYER_TWO -> newTimeMs in 1..LOW_TIME_THRESHOLD_MS
-            Player.PLAYER_ONE -> _uiState.value.player2TimeMs in 1..LOW_TIME_THRESHOLD_MS
+            Player.PLAYER_TWO -> newTimeMs in 1..threshold
+            Player.PLAYER_ONE -> _uiState.value.player2TimeMs in 1..threshold
         }
 
         if (newTimeMs <= 0L) {
@@ -471,6 +475,42 @@ class GameViewModel(
             } catch (e: Exception) {
                 // Handle silently
             }
+        }
+    }
+
+    fun setLowTimeThreshold(thresholdMs: Long) {
+        _uiState.value = _uiState.value.copy(lowTimeThresholdMs = thresholdMs)
+        viewModelScope.launch {
+            try {
+                preferencesRepository.saveLowTimeThreshold(thresholdMs)
+            } catch (e: Exception) {
+                // Handle silently
+            }
+        }
+    }
+
+    fun setTapSoundEnabled(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(tapSoundEnabled = enabled)
+        viewModelScope.launch {
+            try {
+                preferencesRepository.saveTapSoundEnabled(enabled)
+            } catch (e: Exception) {
+                // Handle silently
+            }
+        }
+    }
+
+    fun playTapSound() {
+        if (!_uiState.value.tapSoundEnabled) return
+        try {
+            val toneGenerator = ToneGenerator(AudioManager.STREAM_MUSIC, 80)
+            toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 100)
+            viewModelScope.launch {
+                delay(150)
+                toneGenerator.release()
+            }
+        } catch (e: Exception) {
+            // Sound is not critical
         }
     }
 

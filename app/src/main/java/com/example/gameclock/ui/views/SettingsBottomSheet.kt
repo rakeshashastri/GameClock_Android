@@ -32,13 +32,19 @@ fun SettingsBottomSheet(
     onThemeSelected: (AppTheme) -> Unit,
     lowTimeWarningEnabled: Boolean = true,
     onLowTimeWarningChanged: (Boolean) -> Unit = {},
+    lowTimeThresholdMs: Long = 30_000L,
+    onLowTimeThresholdChanged: (Long) -> Unit = {},
+    tapSoundEnabled: Boolean = true,
+    onTapSoundChanged: (Boolean) -> Unit = {},
     onDismiss: () -> Unit,
     isPremium: Boolean = true,
     onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        sheetState = sheetState,
         modifier = modifier.testTag("settings_bottom_sheet")
     ) {
         SettingsBottomSheetContent(
@@ -47,6 +53,10 @@ fun SettingsBottomSheet(
             onThemeSelected = onThemeSelected,
             lowTimeWarningEnabled = lowTimeWarningEnabled,
             onLowTimeWarningChanged = onLowTimeWarningChanged,
+            lowTimeThresholdMs = lowTimeThresholdMs,
+            onLowTimeThresholdChanged = onLowTimeThresholdChanged,
+            tapSoundEnabled = tapSoundEnabled,
+            onTapSoundChanged = onTapSoundChanged,
             isPremium = isPremium,
             onShowPaywall = onShowPaywall
         )
@@ -60,6 +70,10 @@ private fun SettingsBottomSheetContent(
     onThemeSelected: (AppTheme) -> Unit,
     lowTimeWarningEnabled: Boolean,
     onLowTimeWarningChanged: (Boolean) -> Unit,
+    lowTimeThresholdMs: Long = 30_000L,
+    onLowTimeThresholdChanged: (Long) -> Unit = {},
+    tapSoundEnabled: Boolean = true,
+    onTapSoundChanged: (Boolean) -> Unit = {},
     isPremium: Boolean = true,
     onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -90,7 +104,7 @@ private fun SettingsBottomSheetContent(
 
         // Game Options Section
         Text(
-            text = "Game Options",
+            text = "Game",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -110,7 +124,7 @@ private fun SettingsBottomSheetContent(
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = "Flash red when time is below 30 seconds",
+                    text = "Flash red when time is low",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -118,6 +132,79 @@ private fun SettingsBottomSheetContent(
             Switch(
                 checked = lowTimeWarningEnabled,
                 onCheckedChange = onLowTimeWarningChanged
+            )
+        }
+
+        // Warning Threshold Picker (only when warning is enabled)
+        if (lowTimeWarningEnabled) {
+            val thresholdOptions = listOf(
+                10_000L to "10 seconds",
+                20_000L to "20 seconds",
+                30_000L to "30 seconds",
+                60_000L to "60 seconds"
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Warning Threshold",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f)
+                )
+
+                var expanded by remember { mutableStateOf(false) }
+
+                Box {
+                    TextButton(onClick = { expanded = true }) {
+                        Text(
+                            text = thresholdOptions.firstOrNull { it.first == lowTimeThresholdMs }?.second ?: "30 seconds"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        thresholdOptions.forEach { (ms, label) ->
+                            DropdownMenuItem(
+                                text = { Text(label) },
+                                onClick = {
+                                    onLowTimeThresholdChanged(ms)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Tap Sound Toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Tap Sound",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Play a click sound when tapping the clock",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = tapSoundEnabled,
+                onCheckedChange = onTapSoundChanged
             )
         }
 

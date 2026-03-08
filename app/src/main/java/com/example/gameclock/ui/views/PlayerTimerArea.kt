@@ -24,10 +24,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -94,11 +97,8 @@ fun PlayerTimerArea(
     )
 
     val scale by animateFloatAsState(
-        targetValue = if (isActive && gameState == GameState.RUNNING) 1.02f else 1.0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
+        targetValue = if (isActive && gameState == GameState.RUNNING) 1.01f else 1.0f,
+        animationSpec = tween(durationMillis = 250),
         label = "activeScale"
     )
 
@@ -107,15 +107,12 @@ fun PlayerTimerArea(
 
     suspend fun animateClick() {
         clickScale.animateTo(
-            targetValue = 0.95f,
-            animationSpec = tween(durationMillis = 100)
+            targetValue = 0.98f,
+            animationSpec = tween(durationMillis = 80)
         )
         clickScale.animateTo(
             targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessHigh
-            )
+            animationSpec = tween(durationMillis = 120)
         )
     }
 
@@ -189,18 +186,12 @@ fun PlayerTimerArea(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = if (player == Player.PLAYER_TWO) Modifier.rotate(180f) else Modifier
+            modifier = (if (player == Player.PLAYER_TWO) Modifier.rotate(180f) else Modifier)
+                .windowInsetsPadding(WindowInsets.systemBars)
         ) {
-            // Stage indicator (for multi-stage controls)
-            if (totalStages > 1) {
-                Text(
-                    text = "Stage ${stageIndex + 1}/$totalStages",
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = textColor.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+            // For Player 2 (rotated 180°), put info above timer so it appears below after rotation
+            if (player == Player.PLAYER_TWO) {
+                MovesInfo(gameState, moveCount, totalStages, stageIndex, isActive, delayRemainingMs, textColor)
             }
 
             // Main timer display
@@ -213,28 +204,9 @@ fun PlayerTimerArea(
                 textAlign = TextAlign.Center
             )
 
-            // Move counter (shown during play)
-            if (gameState in listOf(GameState.RUNNING, GameState.PAUSED) && moveCount > 0) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Moves: $moveCount",
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = textColor.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            // Delay display (shown when delay is active for this player)
-            if (isActive && delayRemainingMs > 0 && gameState == GameState.RUNNING) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Delay: %.1fs".format(delayRemainingMs / 1000.0),
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace,
-                    color = textColor.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
+            // For Player 1 (not rotated), put info below timer
+            if (player == Player.PLAYER_ONE) {
+                MovesInfo(gameState, moveCount, totalStages, stageIndex, isActive, delayRemainingMs, textColor)
             }
         }
     }
@@ -257,6 +229,50 @@ private fun formatPlayerTimeMs(ms: Long): String {
         hours > 0 -> "%d:%02d:%02d".format(hours, minutes, seconds)
         ms < 20_000L -> "%02d:%02d.%d".format(minutes, seconds, tenths)
         else -> "%02d:%02d".format(minutes, seconds)
+    }
+}
+
+@Composable
+private fun MovesInfo(
+    gameState: GameState,
+    moveCount: Int,
+    totalStages: Int,
+    stageIndex: Int,
+    isActive: Boolean,
+    delayRemainingMs: Long,
+    textColor: Color
+) {
+    if (totalStages > 1) {
+        Text(
+            text = "Stage ${stageIndex + 1}/$totalStages",
+            fontSize = 14.sp,
+            fontFamily = FontFamily.Monospace,
+            color = textColor.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+
+    if (gameState in listOf(GameState.RUNNING, GameState.PAUSED) && moveCount > 0) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Moves: $moveCount",
+            fontSize = 14.sp,
+            fontFamily = FontFamily.Monospace,
+            color = textColor.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+    }
+
+    if (isActive && delayRemainingMs > 0 && gameState == GameState.RUNNING) {
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Delay: %.1fs".format(delayRemainingMs / 1000.0),
+            fontSize = 14.sp,
+            fontFamily = FontFamily.Monospace,
+            color = textColor.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
     }
 }
 

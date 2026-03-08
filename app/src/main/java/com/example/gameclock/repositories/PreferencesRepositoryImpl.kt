@@ -73,10 +73,33 @@ class PreferencesRepositoryImpl(context: Context) : PreferencesRepository {
         sharedPreferences.getBoolean(KEY_LOW_TIME_WARNING, true)
     }
 
+    override suspend fun saveLowTimeThreshold(thresholdMs: Long) = withContext(Dispatchers.IO) {
+        sharedPreferences.edit()
+            .putLong(KEY_LOW_TIME_THRESHOLD, thresholdMs)
+            .apply()
+    }
+
+    override suspend fun getLowTimeThreshold(): Long = withContext(Dispatchers.IO) {
+        sharedPreferences.getLong(KEY_LOW_TIME_THRESHOLD, DEFAULT_LOW_TIME_THRESHOLD_MS)
+    }
+
+    override suspend fun saveTapSoundEnabled(enabled: Boolean) = withContext(Dispatchers.IO) {
+        sharedPreferences.edit()
+            .putBoolean(KEY_TAP_SOUND, enabled)
+            .apply()
+    }
+
+    override suspend fun getTapSoundEnabled(): Boolean = withContext(Dispatchers.IO) {
+        sharedPreferences.getBoolean(KEY_TAP_SOUND, true)
+    }
+
     companion object {
         private const val PREFS_NAME = "game_clock_preferences"
         private const val KEY_SELECTED_THEME = "selected_theme"
         private const val KEY_LAST_USED_TIME_CONTROL = "last_used_time_control"
         private const val KEY_LOW_TIME_WARNING = "low_time_warning_enabled"
+        private const val KEY_LOW_TIME_THRESHOLD = "low_time_threshold_ms"
+        private const val KEY_TAP_SOUND = "tap_sound_enabled"
+        const val DEFAULT_LOW_TIME_THRESHOLD_MS = 30_000L
     }
 }

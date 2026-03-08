@@ -21,7 +21,9 @@ data class GameUiState(
     val delayRemainingMs: Long = 0L,
     val isLowTime1: Boolean = false,
     val isLowTime2: Boolean = false,
-    val lowTimeWarningEnabled: Boolean = true
+    val lowTimeWarningEnabled: Boolean = true,
+    val lowTimeThresholdMs: Long = 30_000L,
+    val tapSoundEnabled: Boolean = true
 ) {
     // Backward-compatible accessors (convert millis to seconds for external use)
     val player1Time: Long get() = player1TimeMs / 1000L

@@ -51,6 +51,8 @@ fun GameScreen(
     onCustomTimeControlDelete: (TimeControl) -> Unit,
     onThemeSelected: (AppTheme) -> Unit,
     onLowTimeWarningChanged: (Boolean) -> Unit = {},
+    onLowTimeThresholdChanged: (Long) -> Unit = {},
+    onTapSoundChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showTimeControlBottomSheet by remember { mutableStateOf(false) }
@@ -59,7 +61,7 @@ fun GameScreen(
     var showResetConfirmation by remember { mutableStateOf(false) }
     var showPaywall by remember { mutableStateOf(false) }
 
-    val timeControlSheetState = rememberModalBottomSheetState()
+    val timeControlSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Surface(
         modifier = modifier
@@ -193,6 +195,10 @@ fun GameScreen(
                 onThemeSelected = onThemeSelected,
                 lowTimeWarningEnabled = gameUiState.lowTimeWarningEnabled,
                 onLowTimeWarningChanged = onLowTimeWarningChanged,
+                lowTimeThresholdMs = gameUiState.lowTimeThresholdMs,
+                onLowTimeThresholdChanged = onLowTimeThresholdChanged,
+                tapSoundEnabled = gameUiState.tapSoundEnabled,
+                onTapSoundChanged = onTapSoundChanged,
                 onDismiss = { showSettingsBottomSheet = false },
                 isPremium = isPremium,
                 onShowPaywall = { showPaywall = true }

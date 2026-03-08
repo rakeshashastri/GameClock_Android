@@ -49,6 +49,7 @@ class MainActivity : ComponentActivity() {
             val subscriptionPrice = productDetails?.subscriptionOfferDetails?.firstOrNull()
                 ?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: "$4.99/month"
 
+
             LaunchedEffect(gameUiState.gameState) {
                 val keepAwake = gameUiState.gameState == GameState.RUNNING || gameUiState.gameState == GameState.PAUSED
                 if (keepAwake) {
@@ -70,9 +71,16 @@ class MainActivity : ComponentActivity() {
                     onRestore = { billingViewModel.restore() },
                     onPlayerTap = { player ->
                         when (gameUiState.gameState) {
-                            GameState.RUNNING -> gameViewModel.switchPlayer()
-                            GameState.PAUSED -> gameViewModel.resumeGame()
+                            GameState.RUNNING -> {
+                                gameViewModel.playTapSound()
+                                gameViewModel.switchPlayer()
+                            }
+                            GameState.PAUSED -> {
+                                gameViewModel.playTapSound()
+                                gameViewModel.resumeGame()
+                            }
                             GameState.STOPPED -> {
+                                gameViewModel.playTapSound()
                                 val startingPlayer = when (player) {
                                     com.example.gameclock.models.Player.PLAYER_ONE -> com.example.gameclock.models.Player.PLAYER_TWO
                                     com.example.gameclock.models.Player.PLAYER_TWO -> com.example.gameclock.models.Player.PLAYER_ONE
@@ -108,6 +116,12 @@ class MainActivity : ComponentActivity() {
                     },
                     onLowTimeWarningChanged = { enabled ->
                         gameViewModel.setLowTimeWarningEnabled(enabled)
+                    },
+                    onLowTimeThresholdChanged = { thresholdMs ->
+                        gameViewModel.setLowTimeThreshold(thresholdMs)
+                    },
+                    onTapSoundChanged = { enabled ->
+                        gameViewModel.setTapSoundEnabled(enabled)
                     }
                 )
             }

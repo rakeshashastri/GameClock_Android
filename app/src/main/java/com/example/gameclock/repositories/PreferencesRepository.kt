@@ -10,4 +10,8 @@ interface PreferencesRepository {
     suspend fun getLastUsedTimeControl(): TimeControl?
     suspend fun saveLowTimeWarningEnabled(enabled: Boolean)
     suspend fun getLowTimeWarningEnabled(): Boolean
+    suspend fun saveLowTimeThreshold(thresholdMs: Long)
+    suspend fun getLowTimeThreshold(): Long
+    suspend fun saveTapSoundEnabled(enabled: Boolean)
+    suspend fun getTapSoundEnabled(): Boolean
 }
