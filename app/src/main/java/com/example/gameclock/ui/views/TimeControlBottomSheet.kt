@@ -192,11 +192,32 @@ private fun TimeControlBottomSheetContent(
         item {
             SectionHeader(title = "Rapid")
         }
-        
+
         items(TimeControl.RAPID_PRESETS) { timeControl ->
             TimeControlItem(
                 timeControl = timeControl,
-                onClick = { 
+                onClick = {
+                    onTimeControlSelected(timeControl)
+                    onDismiss()
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider()
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        // Classical Presets Section
+        item {
+            SectionHeader(title = "Classical")
+        }
+
+        items(TimeControl.CLASSICAL_PRESETS) { timeControl ->
+            TimeControlItem(
+                timeControl = timeControl,
+                onClick = {
                     onTimeControlSelected(timeControl)
                     onDismiss()
                 }
