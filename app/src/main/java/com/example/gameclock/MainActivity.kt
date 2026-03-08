@@ -25,10 +25,10 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        setContent {
-            val gameRepository = GameRepositoryImpl(this@MainActivity)
-            val preferencesRepository = PreferencesRepositoryImpl(this@MainActivity)
+        val gameRepository = GameRepositoryImpl(this)
+        val preferencesRepository = PreferencesRepositoryImpl(this)
 
+        setContent {
             val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModelFactory(this@MainActivity))
             val gameViewModel: GameViewModel = viewModel(
                 factory = GameViewModelFactory(gameRepository, preferencesRepository, application)
