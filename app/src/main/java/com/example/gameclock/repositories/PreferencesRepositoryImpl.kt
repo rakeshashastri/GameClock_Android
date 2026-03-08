@@ -63,9 +63,20 @@ class PreferencesRepositoryImpl(context: Context) : PreferencesRepository {
         }
     }
     
+    override suspend fun saveLowTimeWarningEnabled(enabled: Boolean) = withContext(Dispatchers.IO) {
+        sharedPreferences.edit()
+            .putBoolean(KEY_LOW_TIME_WARNING, enabled)
+            .apply()
+    }
+
+    override suspend fun getLowTimeWarningEnabled(): Boolean = withContext(Dispatchers.IO) {
+        sharedPreferences.getBoolean(KEY_LOW_TIME_WARNING, true)
+    }
+
     companion object {
         private const val PREFS_NAME = "game_clock_preferences"
         private const val KEY_SELECTED_THEME = "selected_theme"
         private const val KEY_LAST_USED_TIME_CONTROL = "last_used_time_control"
+        private const val KEY_LOW_TIME_WARNING = "low_time_warning_enabled"
     }
 }

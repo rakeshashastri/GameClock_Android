@@ -8,4 +8,6 @@ interface PreferencesRepository {
     suspend fun getSelectedTheme(): AppTheme
     suspend fun saveLastUsedTimeControl(timeControl: TimeControl)
     suspend fun getLastUsedTimeControl(): TimeControl?
+    suspend fun saveLowTimeWarningEnabled(enabled: Boolean)
+    suspend fun getLowTimeWarningEnabled(): Boolean
 }
