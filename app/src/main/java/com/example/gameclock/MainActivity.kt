@@ -17,49 +17,44 @@ import com.example.gameclock.ui.theme.GameClockTheme
 import com.example.gameclock.ui.views.GameScreen
 
 class MainActivity : ComponentActivity() {
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Enable edge-to-edge display for modern Android devices
+
         enableEdgeToEdge()
-        
+
         setContent {
-            // Create repositories
             val gameRepository = GameRepositoryImpl(this@MainActivity)
             val preferencesRepository = PreferencesRepositoryImpl(this@MainActivity)
-            
-            // Get ViewModels using factory
+
             val themeViewModel: ThemeViewModel = viewModel(factory = ThemeViewModelFactory(this@MainActivity))
-            val gameViewModel: GameViewModel = viewModel(factory = GameViewModelFactory(gameRepository, preferencesRepository))
-            
-            // Collect state from ViewModels
+            val gameViewModel: GameViewModel = viewModel(
+                factory = GameViewModelFactory(gameRepository, preferencesRepository, application)
+            )
+
             val theme by themeViewModel.currentTheme.collectAsState()
             val gameUiState by gameViewModel.uiState.collectAsState()
-            
-            // Apply theme and render main screen
+
             GameClockTheme(theme = theme) {
                 GameScreen(
                     gameUiState = gameUiState,
                     currentTheme = theme,
                     availableThemes = themeViewModel.availableThemes,
                     onPlayerTap = { player ->
-                        // Handle player tap based on game state
                         when (gameUiState.gameState) {
                             GameState.RUNNING -> gameViewModel.switchPlayer()
                             GameState.PAUSED -> gameViewModel.resumeGame()
                             GameState.STOPPED -> {
-                                // When game hasn't started, tapping any timer starts the OTHER player's timer
                                 val startingPlayer = when (player) {
                                     com.example.gameclock.models.Player.PLAYER_ONE -> com.example.gameclock.models.Player.PLAYER_TWO
                                     com.example.gameclock.models.Player.PLAYER_TWO -> com.example.gameclock.models.Player.PLAYER_ONE
                                 }
                                 gameViewModel.startGameWithPlayer(startingPlayer)
                             }
-                            else -> { /* No action for game over state */ }
+                            else -> { }
                         }
                     },
-                    onPlayClick = { 
+                    onPlayClick = {
                         when {
                             gameUiState.canStartGame() -> gameViewModel.startGame()
                             gameUiState.canResumeGame() -> gameViewModel.resumeGame()
@@ -73,26 +68,21 @@ class MainActivity : ComponentActivity() {
                     onCustomTimeControlSave = { timeControl ->
                         gameViewModel.addCustomTimeControl(timeControl)
                     },
+                    onCustomTimeControlSaveDifferent = { p1, p2 ->
+                        gameViewModel.addCustomTimeControl(p1)
+                        gameViewModel.setDifferentTimeControls(p1, p2)
+                    },
                     onCustomTimeControlDelete = { timeControl ->
                         gameViewModel.deleteCustomTimeControl(timeControl)
                     },
                     onThemeSelected = { selectedTheme ->
                         themeViewModel.selectTheme(selectedTheme)
+                    },
+                    onLowTimeWarningChanged = { enabled ->
+                        gameViewModel.setLowTimeWarningEnabled(enabled)
                     }
                 )
             }
         }
-    }
-    
-    override fun onPause() {
-        super.onPause()
-        // Automatically pause the game when app goes to background to prevent unfair time loss
-        // This will be handled by the GameViewModel's lifecycle awareness
-    }
-    
-    override fun onResume() {
-        super.onResume()
-        // Resume is handled by user interaction, not automatically
-        // This prevents accidental resumption when returning to the app
     }
 }
