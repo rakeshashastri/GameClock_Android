@@ -12,6 +12,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +51,7 @@ fun GameScreen(
     var showTimeControlBottomSheet by remember { mutableStateOf(false) }
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showCustomTimeControlDialog by remember { mutableStateOf(false) }
+    var showResetConfirmation by remember { mutableStateOf(false) }
 
     val timeControlSheetState = rememberModalBottomSheetState()
 
@@ -142,7 +146,7 @@ fun GameScreen(
                 gameState = gameUiState.gameState,
                 onPlayClick = onPlayClick,
                 onPauseClick = onPauseClick,
-                onResetClick = onResetClick,
+                onResetClick = { showResetConfirmation = true },
                 onSettingsClick = { showSettingsBottomSheet = true },
                 onTimeControlClick = { showTimeControlBottomSheet = true },
                 borderPosition = animatedPlayer2Height,
@@ -182,6 +186,28 @@ fun GameScreen(
                 lowTimeWarningEnabled = gameUiState.lowTimeWarningEnabled,
                 onLowTimeWarningChanged = onLowTimeWarningChanged,
                 onDismiss = { showSettingsBottomSheet = false }
+            )
+        }
+
+        // Reset Confirmation Dialog
+        if (showResetConfirmation) {
+            AlertDialog(
+                onDismissRequest = { showResetConfirmation = false },
+                title = { Text("Reset Game?") },
+                text = { Text("Time and moves will be lost.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showResetConfirmation = false
+                        onResetClick()
+                    }) {
+                        Text("Reset")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetConfirmation = false }) {
+                        Text("Cancel")
+                    }
+                }
             )
         }
 
