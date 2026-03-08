@@ -11,11 +11,11 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.dhriti.gameclock" // Change this to your unique package name
+        applicationId = "com.yourname.gameclock" // TODO: Change this to your unique package name
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.serialization.json)
+    implementation("com.android.billingclient:billing-ktx:7.1.1")
     // implementation(libs.hilt.android)
     // implementation(libs.hilt.navigation.compose)
     // kapt(libs.hilt.compiler)

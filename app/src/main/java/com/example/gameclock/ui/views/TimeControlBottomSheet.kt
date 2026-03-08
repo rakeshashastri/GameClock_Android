@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,8 @@ fun TimeControlBottomSheet(
     onCustomTimeControlDelete: (TimeControl) -> Unit,
     onCreateCustomTimeControl: () -> Unit,
     onDismiss: () -> Unit,
+    isPremium: Boolean = true,
+    onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     if (isVisible) {
@@ -61,7 +64,9 @@ fun TimeControlBottomSheet(
                 onTimeControlSelected = onTimeControlSelected,
                 onCustomTimeControlDelete = onCustomTimeControlDelete,
                 onCreateCustomTimeControl = onCreateCustomTimeControl,
-                onDismiss = onDismiss
+                onDismiss = onDismiss,
+                isPremium = isPremium,
+                onShowPaywall = onShowPaywall
             )
         }
     }
@@ -75,6 +80,8 @@ private fun TimeControlBottomSheetContent(
     onCustomTimeControlDelete: (TimeControl) -> Unit,
     onCreateCustomTimeControl: () -> Unit,
     onDismiss: () -> Unit,
+    isPremium: Boolean = true,
+    onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -231,9 +238,13 @@ private fun TimeControlBottomSheetContent(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { 
-                        onCreateCustomTimeControl()
-                        onDismiss()
+                    .clickable {
+                        if (isPremium) {
+                            onCreateCustomTimeControl()
+                            onDismiss()
+                        } else {
+                            onShowPaywall()
+                        }
                     },
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -248,8 +259,8 @@ private fun TimeControlBottomSheetContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add custom time control",
+                        imageVector = if (isPremium) Icons.Default.Add else Icons.Default.Lock,
+                        contentDescription = if (isPremium) "Add custom time control" else "Premium feature",
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Spacer(modifier = Modifier.width(8.dp))

@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,6 +33,8 @@ fun SettingsBottomSheet(
     lowTimeWarningEnabled: Boolean = true,
     onLowTimeWarningChanged: (Boolean) -> Unit = {},
     onDismiss: () -> Unit,
+    isPremium: Boolean = true,
+    onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -43,7 +46,9 @@ fun SettingsBottomSheet(
             availableThemes = availableThemes,
             onThemeSelected = onThemeSelected,
             lowTimeWarningEnabled = lowTimeWarningEnabled,
-            onLowTimeWarningChanged = onLowTimeWarningChanged
+            onLowTimeWarningChanged = onLowTimeWarningChanged,
+            isPremium = isPremium,
+            onShowPaywall = onShowPaywall
         )
     }
 }
@@ -55,6 +60,8 @@ private fun SettingsBottomSheetContent(
     onThemeSelected: (AppTheme) -> Unit,
     lowTimeWarningEnabled: Boolean,
     onLowTimeWarningChanged: (Boolean) -> Unit,
+    isPremium: Boolean = true,
+    onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -74,7 +81,9 @@ private fun SettingsBottomSheetContent(
         ThemeSelectionSection(
             currentTheme = currentTheme,
             availableThemes = availableThemes,
-            onThemeSelected = onThemeSelected
+            onThemeSelected = onThemeSelected,
+            isPremium = isPremium,
+            onShowPaywall = onShowPaywall
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -121,6 +130,8 @@ private fun ThemeSelectionSection(
     currentTheme: AppTheme,
     availableThemes: List<AppTheme>,
     onThemeSelected: (AppTheme) -> Unit,
+    isPremium: Boolean = true,
+    onShowPaywall: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -136,10 +147,19 @@ private fun ThemeSelectionSection(
             modifier = Modifier.testTag("theme_list")
         ) {
             items(availableThemes) { theme ->
+                val isDefault = theme.id == "default"
+                val isLocked = !isPremium && !isDefault
                 ThemePreviewItem(
                     theme = theme,
                     isSelected = theme.id == currentTheme.id,
-                    onSelected = { onThemeSelected(theme) }
+                    isLocked = isLocked,
+                    onSelected = {
+                        if (isLocked) {
+                            onShowPaywall()
+                        } else {
+                            onThemeSelected(theme)
+                        }
+                    }
                 )
             }
         }
@@ -150,6 +170,7 @@ private fun ThemeSelectionSection(
 private fun ThemePreviewItem(
     theme: AppTheme,
     isSelected: Boolean,
+    isLocked: Boolean = false,
     onSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -200,7 +221,14 @@ private fun ThemePreviewItem(
                 )
             }
 
-            if (isSelected) {
+            if (isLocked) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Premium theme",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Selected theme",

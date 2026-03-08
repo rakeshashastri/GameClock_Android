@@ -36,6 +36,11 @@ fun GameScreen(
     gameUiState: GameUiState,
     currentTheme: AppTheme,
     availableThemes: List<AppTheme>,
+    isPremium: Boolean = true,
+    subscriptionPrice: String = "$4.99/month",
+    purchaseInProgress: Boolean = false,
+    onSubscribe: () -> Unit = {},
+    onRestore: () -> Unit = {},
     onPlayerTap: (Player) -> Unit,
     onPlayClick: () -> Unit,
     onPauseClick: () -> Unit,
@@ -52,6 +57,7 @@ fun GameScreen(
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
     var showCustomTimeControlDialog by remember { mutableStateOf(false) }
     var showResetConfirmation by remember { mutableStateOf(false) }
+    var showPaywall by remember { mutableStateOf(false) }
 
     val timeControlSheetState = rememberModalBottomSheetState()
 
@@ -174,7 +180,9 @@ fun GameScreen(
                 showTimeControlBottomSheet = false
                 showCustomTimeControlDialog = true
             },
-            onDismiss = { showTimeControlBottomSheet = false }
+            onDismiss = { showTimeControlBottomSheet = false },
+            isPremium = isPremium,
+            onShowPaywall = { showPaywall = true }
         )
 
         // Settings Bottom Sheet
@@ -185,7 +193,9 @@ fun GameScreen(
                 onThemeSelected = onThemeSelected,
                 lowTimeWarningEnabled = gameUiState.lowTimeWarningEnabled,
                 onLowTimeWarningChanged = onLowTimeWarningChanged,
-                onDismiss = { showSettingsBottomSheet = false }
+                onDismiss = { showSettingsBottomSheet = false },
+                isPremium = isPremium,
+                onShowPaywall = { showPaywall = true }
             )
         }
 
@@ -227,6 +237,17 @@ fun GameScreen(
             } else null,
             canSaveMoreCustomTimeControls = gameUiState.customTimeControls.size < 5
         )
+
+        // Paywall Dialog
+        if (showPaywall) {
+            PaywallDialog(
+                subscriptionPrice = subscriptionPrice,
+                purchaseInProgress = purchaseInProgress,
+                onSubscribe = onSubscribe,
+                onRestore = onRestore,
+                onDismiss = { showPaywall = false }
+            )
+        }
     }
 }
 
