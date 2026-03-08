@@ -11,6 +11,10 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -18,10 +22,12 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -43,58 +48,51 @@ import androidx.compose.ui.unit.sp
 import com.example.gameclock.models.AppTheme
 import com.example.gameclock.models.GameState
 import com.example.gameclock.models.Player
+import com.example.gameclock.models.TimeControl
 import com.example.gameclock.ui.theme.LocalGameColors
 
-/**
- * PlayerTimerArea composable that displays a player's timer with visual state changes
- * and touch handling for game interactions.
- * 
- * Requirements addressed:
- * - 1.1: Display timer areas for both players
- * - 1.3: Handle touch interactions for switching turns
- * - 1.6: Resume game when tapping timer areas while paused
- * - 5.1: Equal size display when no timer is active
- * - 5.2: Expand active player area to 70% of screen height
- * - 5.3: Reduce opacity to 70% when paused
- * - 7.2: Provide haptic feedback for touch interactions
- * - 7.3: Use large, monospaced fonts for readability
- */
 @Composable
 fun PlayerTimerArea(
     player: Player,
-    timeInSeconds: Long,
+    timeInMs: Long,
     gameState: GameState,
     activePlayer: Player?,
     isActive: Boolean,
     isPaused: Boolean,
     winner: Player?,
-    theme: AppTheme, // Keep for backward compatibility, but use LocalGameColors internally
+    theme: AppTheme,
     onPlayerTap: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    moveCount: Int = 0,
+    stageIndex: Int = 0,
+    totalStages: Int = 1,
+    delayRemainingMs: Long = 0L,
+    isLowTime: Boolean = false,
+    lowTimeWarningEnabled: Boolean = true,
+    // Backward compat: if timeInSeconds is passed instead
+    timeInSeconds: Long = -1L
 ) {
+    val effectiveTimeMs = if (timeInSeconds >= 0) timeInSeconds * 1000L else timeInMs
+
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val gameColors = LocalGameColors.current
-    
-    // Calculate responsive font size based on screen width (Requirement 7.5)
+
     val screenWidth = configuration.screenWidthDp
     val fontSize = when {
-        screenWidth < 360 -> 56.sp // Small screens
-        screenWidth < 480 -> 64.sp // Medium screens
-        else -> 72.sp // Large screens
+        screenWidth < 360 -> 56.sp
+        screenWidth < 480 -> 64.sp
+        else -> 72.sp
     }
-    
-    // Calculate visual states
+
     val shouldShowPausedState = isPaused && gameState == GameState.PAUSED
-    
-    // Animate opacity for paused state (Requirement 5.3)
+
     val alpha by animateFloatAsState(
         targetValue = if (shouldShowPausedState) 0.7f else 1.0f,
         animationSpec = tween(durationMillis = 300),
         label = "pausedOpacity"
     )
-    
-    // Animate scale for active state to provide visual feedback
+
     val scale by animateFloatAsState(
         targetValue = if (isActive && gameState == GameState.RUNNING) 1.02f else 1.0f,
         animationSpec = spring(
@@ -103,12 +101,10 @@ fun PlayerTimerArea(
         ),
         label = "activeScale"
     )
-    
-    // Click animation effect
+
     val clickScale = remember { Animatable(1f) }
     val coroutineScope = rememberCoroutineScope()
-    
-    // Trigger click animation when tapped
+
     suspend fun animateClick() {
         clickScale.animateTo(
             targetValue = 0.95f,
@@ -122,26 +118,34 @@ fun PlayerTimerArea(
             )
         )
     }
-    
-    // Get player color from theme, or red if this player lost
+
+    // Low time flashing animation
+    val showLowTimeWarning = isLowTime && lowTimeWarningEnabled && isActive && gameState == GameState.RUNNING
+    val infiniteTransition = rememberInfiniteTransition(label = "lowTimeFlash")
+    val lowTimeAlpha by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = if (showLowTimeWarning) 0.3f else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 500),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "lowTimeAlpha"
+    )
+
     val backgroundColor = when {
         gameState == GameState.GAME_OVER && winner != null && winner != player -> {
-            // Show red for the losing player
-            Color(0xFFD32F2F) // Material Red 700
+            Color(0xFFD32F2F)
         }
         else -> {
-            // Use theme color for normal states from LocalGameColors
             when (player) {
                 Player.PLAYER_ONE -> gameColors.player1Color
                 Player.PLAYER_TWO -> gameColors.player2Color
             }
         }
     }
-    
-    // Use pre-calculated text color for contrast from LocalGameColors
+
     val textColor = when {
         gameState == GameState.GAME_OVER && winner != null && winner != player -> {
-            // Use white text on red background for losing player
             Color.White
         }
         else -> {
@@ -151,7 +155,7 @@ fun PlayerTimerArea(
             }
         }
     }
-    
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -160,15 +164,13 @@ fun PlayerTimerArea(
             .alpha(alpha)
             .clickable(
                 enabled = when (gameState) {
-                    GameState.RUNNING -> isActive // Only active player's area is clickable when running
-                    GameState.PAUSED -> true // Both areas clickable when paused (for resuming)
-                    GameState.STOPPED -> true // Both areas clickable when stopped (for starting)
-                    else -> false // No areas clickable when game over
+                    GameState.RUNNING -> isActive
+                    GameState.PAUSED -> true
+                    GameState.STOPPED -> true
+                    else -> false
                 }
             ) {
-                // Provide haptic feedback (Requirement 7.2)
                 performHapticFeedback(context)
-                // Trigger click animation
                 coroutineScope.launch {
                     animateClick()
                 }
@@ -176,47 +178,88 @@ fun PlayerTimerArea(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = formatPlayerTime(timeInSeconds),
-            fontSize = fontSize, // Responsive font size (Requirement 7.5)
-            fontFamily = FontFamily.Monospace, // Monospaced font (Requirement 7.3)
-            fontWeight = FontWeight.Bold,
-            color = textColor,
-            textAlign = TextAlign.Center,
-            modifier = if (player == Player.PLAYER_TWO) {
-                Modifier.rotate(180f) // Rotate Player 2 display
-            } else {
-                Modifier
+        // Low time warning flash overlay
+        if (showLowTimeWarning) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Red.copy(alpha = lowTimeAlpha))
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = if (player == Player.PLAYER_TWO) Modifier.rotate(180f) else Modifier
+        ) {
+            // Stage indicator (for multi-stage controls)
+            if (totalStages > 1) {
+                Text(
+                    text = "Stage ${stageIndex + 1}/$totalStages",
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = textColor.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
             }
-        )
+
+            // Main timer display
+            Text(
+                text = formatPlayerTimeMs(effectiveTimeMs),
+                fontSize = fontSize,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+                textAlign = TextAlign.Center
+            )
+
+            // Move counter (shown during play)
+            if (gameState in listOf(GameState.RUNNING, GameState.PAUSED) && moveCount > 0) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Moves: $moveCount",
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = textColor.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Delay display (shown when delay is active for this player)
+            if (isActive && delayRemainingMs > 0 && gameState == GameState.RUNNING) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Delay: %.1fs".format(delayRemainingMs / 1000.0),
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = textColor.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
 
 /**
- * Formats time in seconds to MM:SS format
+ * Formats time in milliseconds with intelligent formatting:
+ * - H:MM:SS when >= 1 hour
+ * - MM:SS when >= 20 seconds
+ * - MM:SS.T (with tenths) when < 20 seconds
  */
-private fun formatPlayerTime(seconds: Long): String {
-    val minutes = seconds / 60
-    val remainingSeconds = seconds % 60
-    return "%02d:%02d".format(minutes, remainingSeconds)
+private fun formatPlayerTimeMs(ms: Long): String {
+    val totalSeconds = ms / 1000L
+    val tenths = (ms % 1000L) / 100L
+    val hours = totalSeconds / 3600L
+    val minutes = (totalSeconds % 3600L) / 60L
+    val seconds = totalSeconds % 60L
+
+    return when {
+        hours > 0 -> "%d:%02d:%02d".format(hours, minutes, seconds)
+        ms < 20_000L -> "%02d:%02d.%d".format(minutes, seconds, tenths)
+        else -> "%02d:%02d".format(minutes, seconds)
+    }
 }
 
-/**
- * Determines if a color is light (for contrast calculation)
- */
-private fun isLightColor(color: Color): Boolean {
-    val red = color.red
-    val green = color.green
-    val blue = color.blue
-    
-    // Calculate luminance using standard formula
-    val luminance = 0.299 * red + 0.587 * green + 0.114 * blue
-    return luminance > 0.5
-}
-
-/**
- * Performs haptic feedback for touch interactions (Requirement 7.2)
- */
 private fun performHapticFeedback(context: Context) {
     try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -234,6 +277,6 @@ private fun performHapticFeedback(context: Context) {
             }
         }
     } catch (e: Exception) {
-        // Haptic feedback is not critical, silently ignore errors
+        // Haptic feedback is not critical
     }
 }
