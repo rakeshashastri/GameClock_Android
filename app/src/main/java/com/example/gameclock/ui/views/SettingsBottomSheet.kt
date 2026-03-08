@@ -29,6 +29,8 @@ fun SettingsBottomSheet(
     currentTheme: AppTheme,
     availableThemes: List<AppTheme>,
     onThemeSelected: (AppTheme) -> Unit,
+    lowTimeWarningEnabled: Boolean = true,
+    onLowTimeWarningChanged: (Boolean) -> Unit = {},
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -39,7 +41,9 @@ fun SettingsBottomSheet(
         SettingsBottomSheetContent(
             currentTheme = currentTheme,
             availableThemes = availableThemes,
-            onThemeSelected = onThemeSelected
+            onThemeSelected = onThemeSelected,
+            lowTimeWarningEnabled = lowTimeWarningEnabled,
+            onLowTimeWarningChanged = onLowTimeWarningChanged
         )
     }
 }
@@ -49,6 +53,8 @@ private fun SettingsBottomSheetContent(
     currentTheme: AppTheme,
     availableThemes: List<AppTheme>,
     onThemeSelected: (AppTheme) -> Unit,
+    lowTimeWarningEnabled: Boolean,
+    onLowTimeWarningChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -57,22 +63,55 @@ private fun SettingsBottomSheetContent(
             .padding(16.dp)
             .testTag("settings_content")
     ) {
-        // Header
         Text(
             text = "Settings",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
         )
-        
+
         // Theme Selection Section
         ThemeSelectionSection(
             currentTheme = currentTheme,
             availableThemes = availableThemes,
             onThemeSelected = onThemeSelected
         )
-        
-        // Bottom spacing for gesture handle
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Game Options Section
+        Text(
+            text = "Game Options",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        // Low Time Warning Toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Low Time Warning",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "Flash red when time is below 30 seconds",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = lowTimeWarningEnabled,
+                onCheckedChange = onLowTimeWarningChanged
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
@@ -91,7 +130,7 @@ private fun ThemeSelectionSection(
             fontWeight = FontWeight.Medium,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        
+
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.testTag("theme_list")
@@ -139,19 +178,16 @@ private fun ThemePreviewItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Theme info and preview
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Theme preview swatch
                 ThemePreviewSwatch(
                     player1Color = Color(theme.player1Color),
                     player2Color = Color(theme.player2Color),
                     modifier = Modifier.testTag("theme_preview_${theme.id}")
                 )
-                
-                // Theme name
+
                 Text(
                     text = theme.name,
                     style = MaterialTheme.typography.bodyLarge,
@@ -163,8 +199,7 @@ private fun ThemePreviewItem(
                     }
                 )
             }
-            
-            // Selection indicator
+
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,
@@ -199,7 +234,6 @@ private fun ThemePreviewSwatch(
                 shape = RoundedCornerShape(8.dp)
             )
     ) {
-        // Player 2 color triangle in bottom right
         Box(
             modifier = Modifier
                 .size(24.dp)
