@@ -156,7 +156,6 @@ fun PlayerTimerArea(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .scale(scale * clickScale.value)
             .background(backgroundColor)
             .alpha(alpha)
             .clickable(
@@ -187,6 +186,7 @@ fun PlayerTimerArea(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = (if (player == Player.PLAYER_TWO) Modifier.rotate(180f) else Modifier)
+                .scale(scale * clickScale.value)
                 .windowInsetsPadding(WindowInsets.systemBars)
         ) {
             // For Player 2 (rotated 180°), put info above timer so it appears below after rotation

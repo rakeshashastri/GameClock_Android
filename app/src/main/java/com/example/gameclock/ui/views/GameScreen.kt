@@ -92,11 +92,9 @@ fun GameScreen(
                 label = "player1Height"
             )
 
-            val animatedPlayer2Height by animateDpAsState(
-                targetValue = player2Height,
-                animationSpec = tween(durationMillis = 300),
-                label = "player2Height"
-            )
+            // Derive player 2 height from player 1 to ensure they always
+            // sum to exactly the screen height (no gap during animation)
+            val animatedPlayer2Height = actualScreenHeight - animatedPlayer1Height
 
             val p2Tc = gameUiState.player2TimeControl
             val p1Tc = gameUiState.player1TimeControl
