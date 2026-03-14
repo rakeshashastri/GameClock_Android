@@ -11,7 +11,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.yourname.gameclock" // TODO: Change this to your unique package name
+        applicationId = "com.dhriti.gameclock"
         minSdk = 26
         targetSdk = 34
         versionCode = 3
@@ -26,9 +26,9 @@ android {
     // Add signing configurations (you'll need to create a keystore first)
     signingConfigs {
         create("release") {
-            storeFile = file("gameclock-release-key.jks")
+            storeFile = file("upload-keystore.jks")
             storePassword = System.getenv("KEYSTORE_PASSWORD") ?: project.findProperty("KEYSTORE_PASSWORD") as String?
-            keyAlias = "gameclock"
+            keyAlias = "upload"
             keyPassword = System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD") as String?
         }
     }
@@ -41,7 +41,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
